@@ -17,3 +17,12 @@ with beam.Pipeline(options=PipelineOptions()) as p:
   #counts | 'Print' >> beam.ParDo(lambda (w, c): print('%s: %s' % (w, c)))
   #counts | 'Print' >> beam.ParDo(lambda (w, c): print('{0}: {1}'.format(w, c)))
   counts | 'Print' >> beam.ParDo(lambda x: print(x))
+  counts | beam.io.WriteToText('gs://scrap-data-location-test/test_output/file.txt')
+  # Write the output using a "Write" transform that has side effects.
+  # pylint: disable=expression-not-assigned
+  counts | 'Write' >> beam.io.WriteToBigQuery(
+    known_args.output,
+    schema='month:STRING, tornado_count:INTEGER',
+    create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+    write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE)
+#p.run()
